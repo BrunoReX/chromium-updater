@@ -25,7 +25,7 @@
 ; Global Symbols
 !define version "v1.10"
 !define BuildBot_URL "http://commondatastorage.googleapis.com/"									;chromium-browser-snapshots" ;"http://build.chromium.org/f/chromium/"
-!define SourceCode_URL "http://src.chromium.org/viewvc/chrome/trunk"
+!define SourceCode_URL "http://chromium.googlesource.com/chromium/chromium/+log/trunk"
 !define Path_Snapshots "chromium-browser-snapshots"
 !define Path_Continuous "chromium-browser-continuous"
 
@@ -37,7 +37,7 @@ BrandingText "Auto-Updater ${version}"
 OutFile "Chromium-Updater.exe"
 
 ; Runtime Packer
-!packhdr "exehead.tmp" '"..\mpui\installer\upx.exe" --best exehead.tmp'
+!packhdr "exehead.tmp" 'bin\upx.exe --best exehead.tmp'
 
 ; Installer Attributes
 XPStyle on
@@ -333,7 +333,7 @@ Section ""
   ${DetailPrint} "Extracting files, please wait..."
 
   CreateDirectory "$PLUGINSDIR\cache"
-  File /oname=$PLUGINSDIR\unzip.exe "unzip.exe"
+  File /oname=$PLUGINSDIR\unzip.exe "bin\unzip.exe"
 
   RetryExtraction:  
   nsExec::Exec /TIMEOUT=30000 '"$PLUGINSDIR\unzip.exe" -o "$PLUGINSDIR\chrome-win32.zip" -d "$PLUGINSDIR\cache"'
@@ -409,7 +409,7 @@ Section ""
 SectionEnd
 
 Function .onInstSuccess
-  Exec '"$EXEDIR\chrome.exe" "about:" "${SourceCode_URL}/?view=log"'
+  Exec '"$EXEDIR\chrome.exe" "about:" "${SourceCode_URL}"'
 FunctionEnd
 
 Function .onInit
