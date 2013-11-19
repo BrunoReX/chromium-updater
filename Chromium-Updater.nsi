@@ -20,6 +20,7 @@
 ################################################################################
 
 ; Includes
+!include FileFunc.nsh
 !include WinVer.nsh
 
 ; Global Symbols
@@ -59,6 +60,8 @@ Page instfiles
 ; Vars
 Var Current
 Var Revision
+Var OldVersion
+Var NewVersion
 Var Address
 Var Channel
 
@@ -199,6 +202,35 @@ FunctionEnd
 
 ;--------------------------------
 
+Function WriteToFile
+Exch $0 ;file to write to
+Exch
+Exch $1 ;text to write
+ 
+  FileOpen $0 $0 a #open file
+  FileSeek $0 0 END #go to end
+  FileWrite $0 $1 #write to file
+  FileClose $0
+ 
+Pop $1
+Pop $0
+FunctionEnd
+ 
+!macro WriteToFile NewLine File String
+  !if `${NewLine}` == true
+  Push `${String}$\r$\n`
+  !else
+  Push `${String}`
+  !endif
+  Push `${File}`
+  Call WriteToFile
+!macroend
+
+!define WriteToFile `!insertmacro WriteToFile false`
+!define WriteLineToFile `!insertmacro WriteToFile true`
+
+;--------------------------------
+
 Section ""
   SetDetailsPrint None
   InitPluginsDir
@@ -206,6 +238,8 @@ Section ""
 
   StrCpy $Current ""
   StrCpy $Revision ""
+  StrCpy $OldVersion ""
+  StrCpy $NewVersion ""
   StrCpy $Address ""
   StrCpy $Channel ""
 
@@ -228,6 +262,7 @@ Section ""
   ${DetailPrint} "Detecting installed version, please wait..."
 
   ClearErrors
+  ${GetFileVersion} "$EXEDIR\chrome.exe" $OldVersion
   ReadINIStr $Current "$EXEDIR\$EXEFILE.ini" "ChromiumUpdater" "revision"
   IfErrors SkipVersionDetection
 
@@ -409,6 +444,12 @@ Section ""
 SectionEnd
 
 Function .onInstSuccess
+  Delete "$EXEDIR\$OldVersion.manifest"
+  ${GetFileVersion} "$EXEDIR\chrome.exe" $NewVersion
+  Push `<assembly$\r$\n   xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>$\r$\n   <assemblyIdentity$\r$\n       name='$NewVersion'$\r$\n       version='$NewVersion'$\r$\n       type='win32'/>$\r$\n   <file name='chrome_elf.dll'/>$\r$\n </assembly>$\r$\n `
+  Push `$EXEDIR\$NewVersion.manifest`
+  Call WriteToFile
+  
   Exec '"$EXEDIR\chrome.exe" "about:" "${SourceCode_URL}"'
 FunctionEnd
 
