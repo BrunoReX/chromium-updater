@@ -20,6 +20,8 @@
 ################################################################################
 
 ; Includes
+!include FileFunc.nsh
+!include LogicLib.nsh
 !include WinVer.nsh
 
 ; Global Symbols
@@ -59,6 +61,8 @@ Page instfiles
 ; Vars
 Var Current
 Var Revision
+Var OldVersion
+Var NewVersion
 Var Address
 Var Channel
 
@@ -206,6 +210,8 @@ Section ""
 
   StrCpy $Current ""
   StrCpy $Revision ""
+  StrCpy $OldVersion ""
+  StrCpy $NewVersion ""
   StrCpy $Address ""
   StrCpy $Channel ""
 
@@ -228,6 +234,7 @@ Section ""
   ${DetailPrint} "Detecting installed version, please wait..."
 
   ClearErrors
+  ${GetFileVersion} "$EXEDIR\chrome.exe" $OldVersion
   ReadINIStr $Current "$EXEDIR\$EXEFILE.ini" "ChromiumUpdater" "revision"
   IfErrors SkipVersionDetection
 
@@ -409,6 +416,12 @@ Section ""
 SectionEnd
 
 Function .onInstSuccess
+  ${GetFileVersion} "$EXEDIR\chrome.exe" $NewVersion
+  
+  ${If} $OldVersion != $NewVersion
+	Delete "$EXEDIR\$OldVersion.manifest"
+  ${EndIf}
+  
   Exec '"$EXEDIR\chrome.exe" "about:" "${SourceCode_URL}"'
 FunctionEnd
 
