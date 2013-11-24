@@ -1,6 +1,7 @@
 ################################################################################
 # Chromium Updater                                                             #
 # Copyright (C) 2008-2012 LoRd_MuldeR <MuldeR2@GMX.de>                         #
+# Copyright (C) 2013 Bruno Barbieri <brunorex@gmail.com>
 #                                                                              #
 # This program is free software; you can redistribute it and/or modify         #
 # it under the terms of the GNU General Public License as published by         #
