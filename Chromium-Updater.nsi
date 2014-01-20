@@ -1,7 +1,7 @@
 ################################################################################
 # Chromium Updater                                                             #
 # Copyright (C) 2008-2012 LoRd_MuldeR <MuldeR2@GMX.de>                         #
-# Copyright (C) 2013 Bruno Barbieri <brunorex@gmail.com>
+# Copyright (C) 2013-2014 Bruno Barbieri <brunorex@gmail.com>                  #
 #                                                                              #
 # This program is free software; you can redistribute it and/or modify         #
 # it under the terms of the GNU General Public License as published by         #
@@ -62,8 +62,7 @@ Page instfiles
 ; Vars
 Var Current
 Var Revision
-Var OldVersion
-Var NewVersion
+Var Version
 Var Address
 Var Channel
 
@@ -211,8 +210,7 @@ Section ""
 
   StrCpy $Current ""
   StrCpy $Revision ""
-  StrCpy $OldVersion ""
-  StrCpy $NewVersion ""
+  StrCpy $Version ""
   StrCpy $Address ""
   StrCpy $Channel ""
 
@@ -235,7 +233,6 @@ Section ""
   ${DetailPrint} "Detecting installed version, please wait..."
 
   ClearErrors
-  ${GetFileVersion} "$EXEDIR\chrome.exe" $OldVersion
   ReadINIStr $Current "$EXEDIR\$EXEFILE.ini" "ChromiumUpdater" "revision"
   IfErrors SkipVersionDetection
 
@@ -417,11 +414,13 @@ Section ""
 SectionEnd
 
 Function .onInstSuccess
-  ${GetFileVersion} "$EXEDIR\chrome.exe" $NewVersion
+  ${GetFileVersion} "$EXEDIR\chrome.exe" $Version
   
-  ${If} $OldVersion != $NewVersion
-	Delete "$EXEDIR\$OldVersion.manifest"
-  ${EndIf}
+  ; For some reason, the ZIP file for Chromium now includes about 512 manifest files
+  ; Delete those files and keep only the ones that are needed
+  Rename "$EXEDIR\$Version.manifest" "$EXEDIR\$Version.tmpifest"
+  Delete "$EXEDIR\*.manifest"
+  Rename "$EXEDIR\$Version.tmpifest" "$EXEDIR\$Version.manifest"
   
   Exec '"$EXEDIR\chrome.exe" "about:" "${SourceCode_URL}"'
 FunctionEnd
