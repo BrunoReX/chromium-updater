@@ -236,8 +236,6 @@ Section ""
   ReadINIStr $Current "$EXEDIR\$EXEFILE.ini" "ChromiumUpdater" "revision"
   IfErrors SkipVersionDetection
 
-  IntOp $Current $Current + 0
-  
   SkipVersionDetection:
   ${ListPrint} "Currently installed build" $Current
 
@@ -290,7 +288,6 @@ Section ""
   IfErrors SkipBuildDetection
   FileRead $0 $Revision
   FileClose $0
-  IntOp $Revision $Revision + 0
   
   SkipBuildDetection:
   Delete "$PLUGINSDIR\LAST_CHANGE.txt"
@@ -315,7 +312,7 @@ Section ""
   ;--------------------------
 
   StrCmp $Current "" BeginUpdate
-  IntCmp $Revision $Current 0 0 BeginUpdate
+  StrCmp $Current $Revision 0 BeginUpdate
 
   ${DetailPrint} "The installed build is still up-to-date."
   MessageBox MB_YESNO|MB_DEFBUTTON2|MB_ICONINFORMATION|MB_TOPMOST "The installed build is still up-to-date. There's nothing to update now!$\n$\nDo you want to download and re-install the latest build anyway?" IDYES BeginUpdate
